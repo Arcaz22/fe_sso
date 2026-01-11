@@ -12,28 +12,47 @@ export const KeycloakProvider = ({ children }) => {
     if (initRef.current) return;
     initRef.current = true;
 
-    console.log("🔑 Initializing Keycloak (DEV MODE)...");
+    console.log("🔑 Initializing Keycloak...");
+    console.log("Config:", {
+      url: import.meta.env.VITE_KEYCLOAK_URL,
+      realm: import.meta.env.VITE_KEYCLOAK_REALM,
+      clientId: import.meta.env.VITE_KEYCLOAK_CLIENT_ID,
+    });
 
     keycloak
       .init({
-        onLoad: "login-required", // ✅ PENTING
+        onLoad: "login-required",
         pkceMethod: "S256",
+        checkLoginIframe: false,
+        enableLogging: true,
+        flow: "standard",
       })
       .then((auth) => {
         console.log("✅ Keycloak initialized");
         console.log("Authenticated:", auth);
-        console.log("Access token present:", !!keycloak.token);
+        console.log("Token present:", !!keycloak.token);
+
+        if (auth && keycloak.token) {
+          console.log("Token expires in:", keycloak.tokenParsed?.exp
+            ? new Date(keycloak.tokenParsed.exp * 1000).toLocaleString()
+            : "N/A");
+          console.log("User info:", keycloak.tokenParsed);
+        }
 
         setAuthenticated(auth);
         setInitialized(true);
       })
       .catch((err) => {
         console.error("❌ Keycloak init failed:", err);
+        console.error("Error details:", {
+          message: err.message,
+          status: err.status,
+          response: err.response,
+        });
         setAuthenticated(false);
         setInitialized(true);
       });
 
-    // Cleanup
     return () => {};
   }, []);
 

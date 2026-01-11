@@ -1,7 +1,8 @@
 import axios from 'axios';
 import keycloak from '../config/keycloak';
 
-const API_BASE_URL = 'http://localhost:8000';
+// const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = 'https://bot.caa.biz.id/';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
